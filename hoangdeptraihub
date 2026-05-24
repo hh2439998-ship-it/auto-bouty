@@ -1,0 +1,84 @@
+-- Cấu trúc Script Hoàng Đẹp Trai
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({Name = "Hoàng Đẹp Trai | Blox Fruits", LoadingTitle = "Khởi động vũ trụ...", Theme = "DarkBlue"})
+
+-- Biến lưu trạng thái
+_G.BringMode = false
+_G.FastAttack = false
+_G.AuraDragon = false
+
+-- Tab chính
+local Main = Window:CreateTab("Auto Farm", nil)
+
+-- Chức năng Bring Mobs (Siêu nhanh - Gom toàn bộ đảo)
+Main:CreateToggle({
+    Name = "Bring All Mobs (Fast)",
+    Callback = function(State)
+        _G.BringMode = State
+        spawn(function()
+            while _G.BringMode do
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("HumanoidRootPart") then
+                        enemy.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+-- Fast Attack (Attack Aura)
+Main:CreateToggle({
+    Name = "Fast Attack Aura",
+    Callback = function(State)
+        _G.FastAttack = State
+        spawn(function()
+            while _G.FastAttack do
+                pcall(function()
+                    game:GetService("VirtualUser"):CaptureController()
+                    game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 720))
+                end)
+                task.wait()
+            end
+        end)
+    end
+})
+
+-- Dragon Storm Aura (Gây đam khi lại gần)
+Main:CreateToggle({
+    Name = "Dragon Storm Aura",
+    Callback = function(State)
+        _G.AuraDragon = State
+        spawn(function()
+            while _G.AuraDragon do
+                for _, v in pairs(workspace.Enemies:GetChildren()) do
+                    local dist = (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if dist < 20 then
+                        -- Gửi tín hiệu gây sát thương cho quái ở gần
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+-- Tween Đảo (Tốc độ 350)
+Main:CreateButton({
+    Name = "Tween tới Đảo (Speed 350)",
+    Callback = function()
+        local TweenService = game:GetService("TweenService")
+        local Info = TweenInfo.new(350, Enum.EasingStyle.Linear)
+        -- Chèn tọa độ các đảo tại đây để di chuyển
+    end
+})
+
+-- Farm nguyên liệu/Level
+Main:CreateToggle({
+    Name = "Auto Level + Materials",
+    Callback = function(State)
+        -- Logic nhận nhiệm vụ và farm sắt/da/rồng
+    end
+})
+  
