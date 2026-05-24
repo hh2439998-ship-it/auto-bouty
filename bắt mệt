@@ -1,0 +1,56 @@
+-- HOÀNG ĐẸP TRAI HUB | TỐI ƯU HÓA BÃI QUÁI
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({Name = "Hoàng Đẹp Trai Hub", LoadingTitle = "Khởi động chiến đấu...", Theme = "DarkBlue"})
+
+_G.FarmSettings = {
+    Mode = "Level",
+    Bring = false,
+    Aura = false,
+    Weapon = "Melee"
+}
+
+-- Tọa độ chuẩn (Bạn cần thay số chính xác từ Dex vào đây)
+local BãiQuái = {
+    ["Bone"] = Vector3.new(-5030, 315, -3150), -- Lâu đài bóng tối (đã fix)
+    ["Cake"] = Vector3.new(-2090, 70, -12120),
+    ["Level"] = Vector3.new(1063, 16, 1545)
+}
+
+-- 1. Hàm Bring Mob phạm vi nhỏ (Hút tối đa 4 con quanh bãi)
+local function BringMobsLocal()
+    spawn(function()
+        while _G.FarmSettings.Bring do
+            local count = 0
+            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                if v:FindFirstChild("HumanoidRootPart") and count < 4 then
+                    local dist = (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if dist < 50 then -- Chỉ hút trong phạm vi 50 stud
+                        v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 2)
+                        count = count + 1
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end
+
+-- 2. Hàm Attack Aura (Fix lỗi không đánh)
+local function AttackAura()
+    spawn(function()
+        while _G.FarmSettings.Aura do
+            pcall(function()
+                -- Thay thế FireServer Combat cũ bằng Remote Tấn công thực tế
+                local Combat = game:GetService("ReplicatedStorage").Remotes.Combat
+                Combat:FireServer("Attack") 
+            end)
+            task.wait(0.05) -- Tốc độ đánh mượt
+        end
+    end)
+end
+
+-- Tab Cài đặt
+local Tab = Window:CreateTab("Auto Farm Pro", nil)
+Tab:CreateDropdown({Name = "Chọn Bãi Farm", Options = {"Level", "Bone", "Cake"}, Callback = function(v) _G.FarmSettings.Mode = v[1] end})
+Tab:CreateToggle({Name = "Bật Bring (Phạm vi hẹp)", Callback = function(s) _G.FarmSettings.Bring = s; if s then BringMobsLocal() end end})
+Tab:CreateToggle({Name = "Bật Attack Aura (Fix)", Callback = function(s) _G.FarmSettings.Aura = s; if s then AttackAura() end end})
