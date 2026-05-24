@@ -1,0 +1,76 @@
+-- Script Hoàng Đẹp Trai - Full All-in-One
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "HoangDepTrai_Hub"
+
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 300, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local GalaxyBG = Instance.new("ImageLabel", MainFrame)
+GalaxyBG.Size = UDim2.new(1, 0, 1, 0)
+GalaxyBG.Image = "rbxassetid://6078693006" -- ID nền thiên hà chuẩn
+GalaxyBG.ZIndex = 0
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Text = "HOÀNG ĐẸP TRAI"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundTransparency = 1
+
+local function createToggle(name, callback)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.Text = name
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Position = UDim2.new(0.05, 0, 0, 40 + (#MainFrame:GetChildren() * 45))
+    local state = false
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        btn.BackgroundColor3 = state and Color3.fromRGB(0, 100, 200) or Color3.fromRGB(40, 40, 40)
+        callback(state)
+    end)
+end
+
+-- Logic Bring Mob (Hút bụi)
+_G.Bring = false
+createToggle("Bring Mobs (Hút bụi)", function(s)
+    _G.Bring = s
+    spawn(function()
+        while _G.Bring do
+            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                if v:FindFirstChild("HumanoidRootPart") then
+                    v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                    v.HumanoidRootPart.CanCollide = false
+                end
+            end
+            task.wait(0.05)
+        end
+    end)
+end)
+
+-- Kill Aura
+_G.Aura = false
+createToggle("Kill Aura", function(s)
+    _G.Aura = s
+    spawn(function()
+        while _G.Aura do
+            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                if v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 25 then
+                    game:GetService("ReplicatedStorage").Remotes.Combat:FireServer()
+                end
+            end
+            task.wait()
+        end
+    end)
+end)
+
+-- Auto Farm (Bone/Cake/Level) - Cần kết hợp Bring để tối ưu
+createToggle("Auto Farm (Level/Bone)", function(s)
+    _G.AutoFarm = s
+    -- Logic farm mặc định của game sẽ dựa vào việc bật Bring + Aura
+end)
+  
