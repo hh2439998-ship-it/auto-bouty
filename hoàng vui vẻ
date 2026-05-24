@@ -1,0 +1,77 @@
+-- HOÀNG ĐẸP TRAI HUB - ALL IN ONE
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({
+    Name = "Hoàng Đẹp Trai Hub | Blox Fruits",
+    LoadingTitle = "Đang khởi động thiên hà...",
+    Theme = "DarkBlue"
+})
+
+_G.Settings = {Mode = "Level", Weapon = "Melee", AutoFarm = false, Bring = false, Aura = false}
+
+-- Tab Farm
+local FarmTab = Window:CreateTab("Auto Farm", nil)
+
+-- Dropdown
+FarmTab:CreateDropdown({Name = "Chọn Mode", Options = {"Level", "Bone", "Cake"}, Callback = function(v) _G.Settings.Mode = v[1] end})
+FarmTab:CreateDropdown({Name = "Chọn Vũ khí", Options = {"Melee", "Sword", "Gun", "Fruit"}, Callback = function(v) _G.Settings.Weapon = v[1] end})
+
+-- Bring Mob (Hút bụi)
+FarmTab:CreateToggle({Name = "Bring Mobs (Hút bụi)", Callback = function(s)
+    _G.Settings.Bring = s
+    spawn(function()
+        while _G.Settings.Bring do
+            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                if v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 200 then
+                    v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                    v.HumanoidRootPart.CanCollide = false
+                end
+            end
+            task.wait(0.05)
+        end
+    end)
+end})
+
+-- Kill Aura Fix
+FarmTab:CreateToggle({Name = "Kill Aura (Tự động đánh)", Callback = function(s)
+    _G.Settings.Aura = s
+    spawn(function()
+        while _G.Settings.Aura do
+            pcall(function()
+                local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+                if tool then tool:Activate() end
+                game:GetService("VirtualUser"):CaptureController()
+                game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 720))
+            end)
+            task.wait(0.01)
+        end
+    end)
+end})
+
+-- Auto Quest & Farm Logic
+FarmTab:CreateToggle({Name = "Auto Farm Active (Quest + Kill)", Callback = function(s)
+    _G.Settings.AutoFarm = s
+    spawn(function()
+        while _G.Settings.AutoFarm do
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                -- Kiểm tra nhiệm vụ
+                if not player.PlayerGui.Main.Quest.Visible then
+                    game:GetService("ReplicatedStorage").Remotes.Comm:InvokeServer("StartQuest", "Bandit", 1)
+                end
+            end)
+            task.wait(2)
+        end
+    end)
+end})
+
+-- Tween Đảo
+FarmTab:CreateButton({Name = "Tween tới Đảo (Auto)", Callback = function()
+    Rayfield:Notify({Title = "Tweening", Content = "Đang bay tới đảo mục tiêu..."})
+    -- Chú ý: Cần điền tọa độ Vector3 vào đây
+end})
+
+-- Hướng dẫn cuối cùng:
+-- 1. Sau khi chạy, vào Menu Rayfield -> Settings.
+-- 2. Dán link ảnh thiên hà (ID: 6078693006) vào mục Custom Theme/Background.
+-- 3. Script đã được cấu trúc lại hoàn toàn để chạy mượt trên Delta.
+  
