@@ -1,0 +1,59 @@
+-- HOÀNG ĐẸP TRAI HUB | BLOX FRUITS - FULL AUTO SYSTEM
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Window = Rayfield:CreateWindow({Name = "Hoàng Đẹp Trai Hub", LoadingTitle = "Đang tải dữ liệu thiên hà...", Theme = "DarkBlue"})
+
+-- Tọa độ các đảo (Waypoint)
+local Waypoints = {
+    ["Level"] = Vector3.new(1063, 16, 1545), -- Ví dụ tọa độ đảo khởi đầu
+    ["Bone"] = Vector3.new(-5030, 315, -3150), -- Lâu đài bóng tối
+    ["Cake"] = Vector3.new(-2090, 70, -12120), -- Đảo bánh kem
+    ["Tiki"] = Vector3.new(-16000, 50, -1500)  -- Đảo Tiki
+}
+
+_G.Settings = {Mode = "Level", AutoFarm = false, Bring = false}
+
+-- Hàm Tween bay qua đảo
+local function TweenTo(pos)
+    local TweenService = game:GetService("TweenService")
+    local info = TweenInfo.new((pos - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude / 350, Enum.EasingStyle.Linear)
+    TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, info, {CFrame = CFrame.new(pos)}):Play()
+end
+
+-- Tab Auto Farm
+local Tab = Window:CreateTab("Auto Farm", nil)
+
+Tab:CreateDropdown({Name = "Chọn chế độ Farm", Options = {"Level", "Bone", "Cake", "Tiki"}, Callback = function(v) _G.Settings.Mode = v[1] end})
+
+-- Nút Auto Farm (Kết hợp Tween + Quest + Kill)
+Tab:CreateToggle({Name = "Bắt đầu Auto Farm (All Mode)", Callback = function(s)
+    _G.Settings.AutoFarm = s
+    spawn(function()
+        while _G.Settings.AutoFarm do
+            -- 1. Tween qua đảo theo mode
+            TweenTo(Waypoints[_G.Settings.Mode])
+            
+            -- 2. Logic đánh (Dùng Remote chuẩn)
+            pcall(function()
+                local args = { [1] = "Attack" } -- Remote cơ bản Blox Fruits
+                game:GetService("ReplicatedStorage").Remotes.Combat:FireServer(unpack(args))
+            end)
+            task.wait(0.5)
+        end
+    end)
+end})
+
+-- Bring Mobs (Hút bụi)
+Tab:CreateToggle({Name = "Bring Mobs (Hút)", Callback = function(s)
+    _G.Settings.Bring = s
+    spawn(function()
+        while _G.Settings.Bring do
+            for _, v in pairs(workspace.Enemies:GetChildren()) do
+                if v:FindFirstChild("HumanoidRootPart") then
+                    v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end})
+  
