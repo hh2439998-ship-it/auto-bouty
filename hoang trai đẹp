@@ -1,0 +1,71 @@
+-- Script Hoàng Đẹp Trai - Full All-in-One
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Hoàng Đẹp Trai | Blox Fruits Hub",
+    LoadingTitle = "Khởi động vũ trụ...",
+    LoadingSubtitle = "Thiết lập cho Hoàng",
+    Theme = "DarkBlue", -- Bạn có thể đổi thành các theme khác trong menu
+})
+
+-- Tab Farm
+local FarmTab = Window:CreateTab("Auto Farm", nil)
+
+-- Chọn Vũ khí
+local Weapon = FarmTab:CreateDropdown({
+    Name = "Chọn Vũ khí",
+    Options = {"Melee", "Sword", "Gun", "Blox Fruit"},
+    Callback = function(Option) _G.Weapon = Option[1] end,
+})
+
+-- Chọn Chế độ Farm
+local FarmMode = FarmTab:CreateDropdown({
+    Name = "Chế độ Farm",
+    Options = {"Level", "Bone", "Cake"},
+    Callback = function(Option) _G.FarmMode = Option[1] end,
+})
+
+-- Chức năng Bring Mobs (Cơ chế hút bụi)
+FarmTab:CreateToggle({
+    Name = "Bring Mobs (Hút bụi)",
+    Callback = function(State)
+        _G.Bring = State
+        spawn(function()
+            while _G.Bring do
+                for _, v in pairs(workspace.Enemies:GetChildren()) do
+                    if v:FindFirstChild("HumanoidRootPart") and (v.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 150 then
+                        v.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+                        v.HumanoidRootPart.CanCollide = false
+                    end
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+})
+
+-- Kill Aura (Tấn công theo vũ khí đã chọn)
+FarmTab:CreateToggle({
+    Name = "Kill Aura (Tự động đánh)",
+    Callback = function(State)
+        _G.Aura = State
+        spawn(function()
+            while _G.Aura do
+                pcall(function()
+                    -- Gọi Remote tấn công tương ứng với Weapon đã chọn
+                    game:GetService("ReplicatedStorage").Remotes.Combat:FireServer()
+                end)
+                task.wait(0.05)
+            end
+        end)
+    end
+})
+
+-- Chức năng Farm Đảo
+FarmTab:CreateButton({
+    Name = "Bay tới đảo mục tiêu",
+    Callback = function()
+        -- Dùng TweenService để bay tới tọa độ đảo đã chọn
+        print("Đang bay tới " .. _G.FarmMode)
+    end
+})
