@@ -1,0 +1,57 @@
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local TeleportService = game:GetService("TeleportService")
+local LocalPlayer = Players.LocalPlayer
+
+local function getTarget()
+    local target = nil
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            target = v
+            break
+        end
+    end
+    return target
+end
+
+local function attackTarget(target)
+    local attempts = 0
+    while attempts < 10 do
+        if not target or not target.Character or target.Character.Humanoid.Health <= 0 then break end
+        
+        local targetHrp = target.Character.HumanoidRootPart
+        LocalPlayer.Character.HumanoidRootPart.CFrame = targetHrp.CFrame * CFrame.new(0, 5, 2) -- TP lên trên và trước mặt
+        
+        -- Kích hoạt Z Dragon Talon
+        VirtualInputManager:SendKeyEvent(true, "Z", false, nil)
+        task.wait(0.1)
+        VirtualInputManager:SendKeyEvent(false, "Z", false, nil)
+        
+        -- Logic dìm nước (di chuyển mục tiêu xuống dưới mặt nước)
+        targetHrp.CFrame = targetHrp.CFrame - Vector3.new(0, 10, 0)
+        
+        task.wait(1.5)
+        attempts = attempts + 1
+    end
+end
+
+local function startAutoBounty()
+    while true do
+        local target = getTarget()
+        if target then
+            attackTarget(target)
+        else
+            -- Không còn mục tiêu, đổi server
+            local Servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?limit=100"))
+            for _, server in pairs(Servers.data) do
+                if server.playing < server.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                    break
+                end
+            end
+        end
+        task.wait(2)
+    end
+end
+
+spawn(startAutoBounty)
